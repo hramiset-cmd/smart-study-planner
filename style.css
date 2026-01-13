@@ -1,25 +1,76 @@
-body {
-    font-family: Arial;
-    background: #f2f2f2;
+function createInputs() {
+    let count = document.getElementById("count").value;
+    let div = document.getElementById("subjects");
+
+    if (count <= 0) {
+        alert("Enter number of subjects");
+        return;
+    }
+
+    div.innerHTML = "";
+
+    for (let i = 1; i <= count; i++) {
+        div.innerHTML += `
+            <label>Subject ${i}</label>
+            <input class="sub">
+            <select class="diff">
+                <option value="1">Easy</option>
+                <option value="2">Medium</option>
+                <option value="3">Hard</option>
+            </select>
+        `;
+    }
 }
 
-.container {
-    background: white;
-    width: 400px;
-    margin: auto;
-    padding: 20px;
-    margin-top: 50px;
-    border-radius: 10px;
+function goToPlan() {
+    let subjects = document.querySelectorAll(".sub");
+    let diffs = document.querySelectorAll(".diff");
+    let hours = document.getElementById("hours").value;
+    let days = document.getElementById("days").value;
+
+    if (subjects.length === 0 || hours <= 0 || days <= 0) {
+        alert("Please fill all details");
+        return;
+    }
+
+    let data = {
+        subjects: [],
+        diffs: [],
+        hours: hours,
+        days: days
+    };
+
+    subjects.forEach(s => data.subjects.push(s.value));
+    diffs.forEach(d => data.diffs.push(d.value));
+
+    localStorage.setItem("studyData", JSON.stringify(data));
+
+    window.location.href = "plan.html";
 }
 
-input, select, button {
-    width: 100%;
-    margin: 5px 0;
-    padding: 8px;
+function showPlan() {
+    let data = JSON.parse(localStorage.getItem("studyData"));
+    if (!data) return;
+
+    let total = data.diffs.reduce((a, b) => a + Number(b), 0);
+    let output = "";
+
+    for (let d = 1; d <= data.days; d++) {
+        output += `<b>Day ${d}</b><br>`;
+        data.subjects.forEach((s, i) => {
+            let time = ((data.diffs[i] / total) * data.hours).toFixed(2);
+            output += `${s}: ${time} hrs<br>`;
+        });
+        output += "<br>";
+    }
+
+    document.getElementById("output").innerHTML = output;
 }
 
-button {
-    background: #4CAF50;
-    color: white;
-    border: none;
+function goBack() {
+    window.location.href = "index.html";
+}
+
+if (window.location.pathname.includes("plan.html")) {
+    showPlan();
 }
